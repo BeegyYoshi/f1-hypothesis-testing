@@ -1,6 +1,6 @@
 # F1 Hybrid-Era Hypothesis Testing
 
-Data Science midterm project. We test how much qualifying position, team, era, pit-crew performance and track type shape a Formula 1 race result in the hybrid era (2014–2026), using six hypothesis tests with effect sizes, 95% confidence intervals and Holm correction.
+Data Science midterm project. We test how much qualifying position, team, era, pit-crew performance and track type shape a Formula 1 race result in the hybrid era (2014–2026), using five hypothesis tests with effect sizes, 95% confidence intervals and Holm correction.
 
 ## Data
 
@@ -28,7 +28,7 @@ python src/build_dataset.py   # joins the raw tables -> data/f1_race_results.csv
 python src/prepare.py         # cleaning -> data/f1_clean.csv, data/pit_stops_clean.csv
 python src/before_after.py    # before/after comparison + figure
 python src/eda.py             # EDA figures
-python src/tests.py           # tests A-F, Holm correction -> data/test_results.csv
+python src/tests.py           # tests A-E, Holm correction -> data/test_results.csv
 ```
 
 Run the scripts from the project root, in this order. Figures are written to `report/figures/`.
@@ -41,7 +41,7 @@ Run the scripts from the project root, in this order. Figures are written to `re
 | `src/prepare.py` | Duplicates, era filter, pit-lane starts, missing values, pit-stop outliers, encoding |
 | `src/before_after.py` | Before-and-after observations of the cleaning |
 | `src/eda.py` | Five EDA plots, one per test |
-| `src/tests.py` | Tests A–F with robustness checks, CIs, practical verdicts, Holm |
+| `src/tests.py` | Tests A–E with robustness checks, CIs, practical verdicts, Holm |
 | `data/` | Derived tables (the raw dump is ignored) |
 | `report/` | Report sections (Markdown + LaTeX) and figures |
 

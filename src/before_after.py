@@ -59,7 +59,7 @@ for label, p in [("before", pit_b), ("after", pit_a)]:
           f"min {s.min():.1f}, max {s.max():.1f}, skew {s.skew():.2f}, kurtosis {s.kurt():.1f}, "
           f"stops > 60 s {(s > 60).sum()}")
 
-print("\nPIT DELTA BY GROUP (mean of per-stop delta, s; what Tests D and F will compare)")
+print("\nPIT DELTA BY GROUP (mean of per-stop delta, s; what Test D will compare)")
 top = ["mercedes", "red_bull", "ferrari", "mclaren"]
 pit_b["top_team"] = pit_b.constructor.isin(top)
 pit_b["winner"] = pit_b.position.eq(1) & pit_b.is_classified.eq("t")

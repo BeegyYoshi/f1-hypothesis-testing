@@ -98,7 +98,7 @@ ax.set(yticks=[0, 1], yticklabels=["Permanent", "Street"], xlabel="Spearman ρ b
 save(fig, ax, "track_type", "How well the grid predicts each race's result, by track type")
 print("[4]", rr.groupby("street").rho.describe().round(3).to_dict("index"))
 
-# 5. pit delta per driver-race (Tests D and F)
+# 5. pit delta per driver-race (Test D)
 d = df.dropna(subset=["pit_delta_s"])
 groups = [("Top-4 winners", d[d.top_team & d.winner].pit_delta_s, BLUE),
           ("Top-4 non-winners", d[d.top_team & ~d.winner].pit_delta_s, BLUE),

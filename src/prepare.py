@@ -1,7 +1,7 @@
 """Data preparation for the hypothesis tests (report point 2).
 
 Input:  data/f1_race_results.csv  (from build_dataset.py) + data/raw/formula_one_pitstop.csv
-Output: data/f1_clean.csv          one row per driver per race, hybrid era, ready for tests A-F
+Output: data/f1_clean.csv          one row per driver per race, hybrid era, ready for tests A-E
         data/pit_stops_clean.csv   one row per pit stop, with the race-median-adjusted time
 Run:    python src/prepare.py
 """

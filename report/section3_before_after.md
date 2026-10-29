@@ -61,7 +61,7 @@ All numbers come from `src/before_after.py`. **Before** means the 2014–2026 ro
 
 **Observation:** the shares hardly change (podium 14.7% → 14.9%, retired 15.4% → 15.4%). The changes come from the removed rows and from the 3 disqualified drivers who are now correctly counted as not classified. Test C's contingency table rests on the same picture before and after cleaning.
 
-## 5. Pit-stop durations (Tests D, F): the biggest change
+## 5. Pit-stop durations (Test D): the biggest change
 
 | Per stop | Before | After |
 |---|---:|---:|
@@ -81,8 +81,8 @@ All numbers come from `src/before_after.py`. **Before** means the 2014–2026 ro
 **Observations:**
 
 - **The mean was meaningless before cleaning.** At 105.6 s it was 4.4 times the median, because 6% of the "stops" were cars parked for up to 51 minutes. After cleaning, mean and median agree (24.2 vs 23.6 s).
-- **The spread fell almost 100-fold** (SD 358 → 3.8 s). Any test of variances (Test F) on the raw data would have measured red flags, not pit crews.
-- **The shape is now close to symmetric.** Skewness fell from 4.78 to 0.61 and excess kurtosis from 23.7 to 1.0, so t- and F-tests, which assume roughly normal data, become reasonable. A mild right skew remains, which is why Tests D and F keep the Mann-Whitney and Levene checks.
+- **The spread fell almost 100-fold** (SD 358 → 3.8 s).
+- **The shape is now close to symmetric.** Skewness fell from 4.78 to 0.61 and excess kurtosis from 23.7 to 1.0, so t-tests, which assume roughly normal data, become reasonable. A mild right skew remains, which is why Test D keeps the Mann-Whitney check.
 
 ## 6. What the outliers would have done to the tests
 

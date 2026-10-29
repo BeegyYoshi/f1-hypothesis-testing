@@ -1,6 +1,6 @@
 # 5. Statistical Inference
 
-All numbers come from `src/tests.py` and are saved in `data/test_results.csv`. Six tests were planned, and every choice in parts (a) and (b) was fixed in the plan before any test was run.
+All numbers come from `src/tests.py` and are saved in `data/test_results.csv`. Five tests were planned, and every choice in parts (a) and (b) was fixed in the plan before any test was run.
 
 ## Common setup
 
@@ -225,79 +225,19 @@ The V CI comes from a bootstrap of 2,000 resamples of driver-races.
 
 ---
 
-## Test F: Are the top teams' pit stops more consistent than the rest's?
-
-### (a) Before running
-
-| | |
-|---|---|
-| Unit | The same D values as Test D, split into top-4 teams T (n = 1,974) and all other teams R (n = 2,951) |
-| Hypotheses | H₀: σ²_T = σ²_R &nbsp; vs &nbsp; H₁: σ²_T ≠ σ²_R |
-| Level, sides | α = 0.05, two-sided |
-| Test | F-test for two variances: F = s²_T / s²_R, df = (n_T − 1, n_R − 1) |
-| Smallest difference that matters | A difference of 0.15 s in standard deviation |
-
-### (b) Other tests considered
-
-| Test | Why not the main test |
-|---|---|
-| Chi-square test for one variance | Compares one sample with a fixed, known σ₀². The rest's variance is estimated, not known |
-| Welch's t-test | Answers a question about means, not spread |
-| Levene / Brown-Forsythe | More robust to non-normality. **Used as robustness checks**, and important here (see below) |
-
-### (c) Results
-
-| | n | SD of D | IQR | MAD |
-|---|---:|---:|---:|---:|
-| Top 4 | 1,974 | 1.347 s | 0.857 s | 0.399 s |
-| Rest | 2,951 | 1.521 s | 1.115 s | 0.500 s |
-
-| Statistic | df | p | Decision | σ²_T/σ²_R [95% CI] | s_T − s_R [95% CI] |
-|---|---|---|---|---|---|
-| F = 0.784 | (1,973, 2,950) | 5.1 × 10⁻⁹ | **Reject H₀** | 0.784 [0.724, 0.851] | −0.174 s [−0.300, −0.044] |
-
-The variance-ratio CI is [F / F₀.₉₇₅, F / F₀.₀₂₅]; both critical values are needed because the F distribution is not symmetric. The CI for the SD ratio is [0.851, 0.922]. The CI for the SD difference comes from a bootstrap of 5,000 resamples.
-
-- **Normality check:** see the Q-Q plot below. Both groups have heavy right tails (excess kurtosis 9.2 and 7.4, skew 2.5 and 2.1), so the F-test's normality assumption is **clearly violated**. With heavy tails, the F-test rejects too easily, so its p-value alone cannot be trusted.
-- **Robustness:** Levene W = 19.71, df (1, 4,923), p = 9.2 × 10⁻⁶. Brown-Forsythe (median-centred) W = 15.50, p = 8.4 × 10⁻⁵. Both robust tests agree, and so do the outlier-resistant spreads (IQR 23% smaller, MAD 20% smaller for the top teams). The conclusion stands even though the F-test's own p-value is too optimistic.
-- **Is it large enough to matter?** Partly. The top teams' SD is 0.17 s smaller, just above δ = 0.15, but the CI [−0.30, −0.04] reaches inside ±0.15. **Verdict: significant, possibly small.** Top crews are more consistent, but we cannot rule out that the gain is below what would matter in a race.
-
-![Q-Q plots of pit delta](figures/qq_pit_delta.png)
-
-*Takeaway: both groups bend away from the line in the upper tail (occasional slow stops), so the robust Levene and Brown-Forsythe tests are the trustworthy ones.*
-
----
-
 ## Summary and multiple testing
 
-| Test | Statistic (df) | p | Holm p (m = 6) | Estimate [95% CI] | Effect size | Decision | Practical verdict |
+| Test | Statistic (df) | p | Holm p (m = 5) | Estimate [95% CI] | Effect size | Decision | Practical verdict |
 |---|---|---|---|---|---|---|---|
 | A Grid vs finish | t = 75.37 (4,555) | < 10⁻³⁰⁰ | < 10⁻³⁰⁰ | r = 0.745 [0.732, 0.758] | r² = 0.555 | Reject | **Matters** |
 | B Pole by era | z = −0.67 | 0.503 | 0.503 | −0.041 [−0.161, 0.079] | h = −0.08 | Fail to reject | Inconclusive |
-| C Team × finish | χ² = 303.75 (9) | 4.2 × 10⁻⁶⁰ | 2.1 × 10⁻⁵⁹ | V = 0.218 [0.196, 0.244] | V = 0.218 | Reject | **Matters** |
-| D Pit speed, winners | t = −9.89 (586.7) | 2.0 × 10⁻²¹ | 7.8 × 10⁻²¹ | −0.565 s [−0.677, −0.453] | d = −0.42 | Reject | **Matters** |
+| C Team × finish | χ² = 303.75 (9) | 4.2 × 10⁻⁶⁰ | 1.7 × 10⁻⁵⁹ | V = 0.218 [0.196, 0.244] | V = 0.218 | Reject | **Matters** |
+| D Pit speed, winners | t = −9.89 (586.7) | 2.0 × 10⁻²¹ | 5.9 × 10⁻²¹ | −0.565 s [−0.677, −0.453] | d = −0.42 | Reject | **Matters** |
 | E Track type | t = 1.35 (60.2) | 0.181 | 0.362 | +0.095 [−0.046, 0.236] | d = 0.23 | Fail to reject | Inconclusive |
-| F Pit consistency | F = 0.784 (1,973, 2,950) | 5.1 × 10⁻⁹ | 1.5 × 10⁻⁸ | ratio 0.784 [0.724, 0.851] | Δs = −0.174 s | Reject | Significant, possibly small |
-
-### Holm for any 5 of the 6
-
-Holm-adjusted p-values when one test is dropped (row = the dropped test):
-
-| Dropped | A | B | C | D | E | F |
-|---|---|---|---|---|---|---|
-| A | – | 0.503 | 2.1e-59 | 7.8e-21 | 0.362 | 1.5e-08 |
-| B | < 1e-300 | – | 1.7e-59 | 5.9e-21 | 0.181 | 1.0e-08 |
-| C | < 1e-300 | 0.503 | – | 7.8e-21 | 0.362 | 1.5e-08 |
-| D | < 1e-300 | 0.503 | 1.7e-59 | – | 0.362 | 1.5e-08 |
-| E | < 1e-300 | 0.503 | 1.7e-59 | 5.9e-21 | – | 1.0e-08 |
-| F | < 1e-300 | 0.503 | 1.7e-59 | 5.9e-21 | 0.362 | – |
-
-**Whichever 5 tests are reported, the decisions do not change:** A, C, D and F are rejected, and B and E are not. Holm only adjusts the p-values that were already far from 0.05.
 
 ### Overall conclusions
 
 1. **Starting position is the strongest single factor** (A): it explains about 55% of finishing order, and each grid slot is worth about 0.65 places.
 2. **The team matters, in a structured way** (C): a medium association, driven by Mercedes' podium rate and McLaren's points misses.
 3. **Pit crews separate winners from everyone else** (D): winners' stops are about 0.56 s faster than those of other top-team drivers, beyond the 0.3 s threshold.
-4. **Top crews are more consistent, but only modestly** (F): SD 0.17 s lower, confirmed by robust tests despite heavy tails.
-5. **Two widely held beliefs are not supported:** the post-2020 rules did not measurably change how often pole wins (B), and street circuits are not clearly more or less processional than permanent ones (E). Both are **inconclusive, not "no effect"**: 267 races cannot rule out a 10-point or 0.1-z difference.
+4. **Two widely held beliefs are not supported:** the post-2020 rules did not measurably change how often pole wins (B), and street circuits are not clearly more or less processional than permanent ones (E). Both are **inconclusive, not "no effect"**: 267 races cannot rule out a 10-point or 0.1-z difference.

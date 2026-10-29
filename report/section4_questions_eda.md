@@ -23,9 +23,8 @@ These questions are **descriptive**: each is answered by a count or an average a
 
 1. **From counting to inference.** "Pole wins 54% of the time" is a fact about one sample. We ask whether the rate *changed* between eras and whether that change is larger than sampling noise, using a confidence interval and a pre-set **smallest difference that matters** (for example 10 percentage points). A significant result that is too small to matter is reported as such.
 2. **A fair pit-stop measure.** Raw pit times mostly measure the *pit lane*: the race median ranges from 16 s to 37 s depending on the track. We subtract each race's median stop, so every stop is measured relative to the same field on the same day. Section 3 showed that without this cleaning the main pit-stop conclusion **reverses**.
-3. **Speed and consistency are separate questions.** Test D asks whether winners' crews are *faster on average*. Test F asks whether top teams' crews are *more consistent* (variance). A crew can be fast but erratic, and the basic questions never separate the two.
-4. **The right unit for track type.** Pooling all drivers at Monaco would count one race 20 times. Test E reduces each race to **one number**, its grid-to-finish correlation, and compares street and permanent races, so each race is one independent observation.
-5. **Assumptions are tested, not assumed.** Each test is paired with a robustness check (Spearman, Mann-Whitney, Levene) chosen from what the EDA below shows about the data's shape.
+3. **The right unit for track type.** Pooling all drivers at Monaco would count one race 20 times. Test E reduces each race to **one number**, its grid-to-finish correlation, and compares street and permanent races, so each race is one independent observation.
+4. **Assumptions are tested, not assumed.** Each test is paired with a robustness check (Spearman, Mann-Whitney) chosen from what the EDA below shows about the data's shape.
 
 ## EDA plots
 
@@ -61,7 +60,7 @@ These questions are **descriptive**: each is answered by a count or an average a
 
 *Effect on the tests:* this goes against the common belief that street races are chaotic, which is why Test E is **two-sided**. Correlations are bounded at 1 and skewed left, so the Fisher z-transform is applied before the Welch t-test. There are 45 street races against 222 permanent ones, a strong imbalance that rules out the pooled t-test.
 
-### Plot 5: Pit-stop time relative to the race median (Tests D and F)
+### Plot 5: Pit-stop time relative to the race median (Test D)
 
 ![Pit delta by group](figures/eda_pit_delta.png)
 
@@ -69,4 +68,4 @@ These questions are **descriptive**: each is answered by a count or an average a
 
 *Effect on the tests:*
 - **Test D (mean):** winners vs top-4 non-winners differ by about 0.57 s, above the 0.3 s threshold. The groups are very unequal in size (259 vs 1,715) and have very different spreads, which is exactly the case for **Welch's t-test** rather than the pooled test.
-- **Test F (variance):** all top-4 entries have SD 1.35 s against 1.52 s for the rest. The difference of 0.17 s is just above the 0.15 s threshold, so this test is the closest call. All groups have a long right tail (slow stops), and the F-test is sensitive to non-normality, so the **Levene / Brown-Forsythe check is essential** here.
+

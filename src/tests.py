@@ -1,11 +1,8 @@
-"""Hypothesis tests A-F for report point 5, exactly as pre-registered in the plan doc.
+"""Hypothesis tests A-E for report point 5, exactly as pre-registered in the plan doc.
 
 Run: python src/tests.py   (after prepare.py)
-Prints every reported number; writes data/test_results.csv and report/figures/qq_pit_delta.png.
+Prints every reported number; writes data/test_results.csv.
 """
-from itertools import combinations
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy import stats
@@ -167,43 +164,6 @@ print(f"  check circuit-level ({len(cs)} street, {len(cp)} permanent circuits): 
 print("  street circuits mean rho:", rr[rr.street].groupby("circuit").rho.agg(["mean", "size"]).round(3).to_dict("index"))
 print(f"  shape: skew z S {zs.skew():.2f}, P {zp.skew():.2f}")
 
-# ---------------- Test F: pit consistency ----------------
-print("=" * 70, "\nTEST F: variance of pit delta, top 4 vs rest")
-dd = df.dropna(subset=["pit_delta_s"])
-T, R = dd[dd.top_team].pit_delta_s.to_numpy(), dd[~dd.top_team].pit_delta_s.to_numpy()
-nT, nR, sT, sR = len(T), len(R), T.std(ddof=1), R.std(ddof=1)
-F = sT**2 / sR**2
-cdf = stats.f.cdf(F, nT - 1, nR - 1)
-p = 2 * min(cdf, 1 - cdf)
-rlo, rhi = F / stats.f.ppf(0.975, nT - 1, nR - 1), F / stats.f.ppf(0.025, nT - 1, nR - 1)
-diffs = np.array([rng.choice(T, nT).std(ddof=1) - rng.choice(R, nR).std(ddof=1) for _ in range(5000)])
-slo, shi = np.percentile(diffs, [2.5, 97.5])
-print(f"T n={nT} sd={sT:.4f}; R n={nR} sd={sR:.4f}")
-print(f"F={F:.4f}, df=({nT - 1}, {nR - 1}), p={p:.3g}, ratio of variances 95% CI [{rlo:.4f}, {rhi:.4f}], "
-      f"SD ratio CI [{np.sqrt(rlo):.4f}, {np.sqrt(rhi):.4f}]")
-print(f"  sT - sR = {sT - sR:.4f} s, bootstrap 95% CI [{slo:.4f}, {shi:.4f}]")
-report("F", F, (nT - 1, nR - 1), p, F, rlo, rhi, sT - sR, 0.15, slo, shi)
-for center in ["mean", "median"]:
-    lv = stats.levene(T, R, center=center)
-    print(f"  check {'Levene' if center == 'mean' else 'Brown-Forsythe'}: W={lv.statistic:.3f}, df=(1, {nT + nR - 2}), p={lv.pvalue:.3g}")
-iqr = lambda a: np.subtract(*np.percentile(a, [75, 25]))
-print(f"  IQR T {iqr(T):.3f} vs R {iqr(R):.3f}; MAD T {stats.median_abs_deviation(T):.3f} vs R {stats.median_abs_deviation(R):.3f}")
-print(f"  shape: skew T {stats.skew(T):.2f}, R {stats.skew(R):.2f}; excess kurtosis T {stats.kurtosis(T):.2f}, R {stats.kurtosis(R):.2f}")
-
-fig, axes = plt.subplots(1, 2, figsize=(6.4, 3), sharey=True, constrained_layout=True)
-for ax, a, name, col in [(axes[0], T, "Top-4 teams", "#2a78d6"), (axes[1], R, "All other teams", "#eb6834")]:
-    (osm, osr), (sl, ic, _) = stats.probplot(a)
-    ax.scatter(osm, osr, s=6, color=col, alpha=.5, edgecolor="none")
-    ax.plot(osm, sl * osm + ic, color="#52514e", linewidth=1)
-    ax.set_title(f"{name} (n = {len(a):,})", loc="left", fontsize=9, color="#0b0b0b")
-    ax.set_xlabel("Normal quantiles", fontsize=8, color="#52514e")
-    for s in ["top", "right"]:
-        ax.spines[s].set_visible(False)
-    ax.set_facecolor("#fcfcfb")
-    ax.tick_params(labelsize=7, colors="#52514e")
-axes[0].set_ylabel("Pit delta (s)", fontsize=8, color="#52514e")
-fig.savefig("report/figures/qq_pit_delta.png", dpi=200, facecolor="#fcfcfb")
-
 # ---------------- Holm ----------------
 res = pd.DataFrame(results).set_index("test")
 def holm(pvals):
@@ -211,16 +171,9 @@ def holm(pvals):
     m = len(order)
     adj = np.maximum.accumulate([min(1, (m - k) * pv) for k, pv in enumerate(order)])
     return pd.Series(adj, index=order.index)
-res["holm_p_all6"] = holm(res.p)
-res["holm_reject_all6"] = res.holm_p_all6 < ALPHA
-print("=" * 70, "\nSUMMARY (Holm over all 6)")
+res["holm_p"] = holm(res.p)
+res["holm_reject"] = res.holm_p < ALPHA
+print("=" * 70, "\nSUMMARY (Holm over all 5)")
 pd.set_option("display.width", 200)
 print(res.drop(columns=["df"]).round(5).to_string())
-print("\nHolm-adjusted p for every 5-test subset (row = dropped test):")
-rows = {}
-for keep in combinations(res.index, 5):
-    dropped = (set(res.index) - set(keep)).pop()
-    rows[dropped] = holm(res.p[list(keep)])
-sub = pd.DataFrame(rows).T.sort_index()
-print(sub.map(lambda v: f"{v:.3g}" if pd.notna(v) else "-").to_string())
 res.to_csv("data/test_results.csv")

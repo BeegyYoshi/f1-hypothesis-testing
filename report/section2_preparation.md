@@ -46,7 +46,7 @@ All steps are in `src/prepare.py`, which reads the table from Section 1 and writ
 | `pit_stops` | 349 | The driver made no stop, usually because they retired early | Set to **0**. Every remaining race has pit data, so no record means no stop |
 | `race_time_s` | 1,911 | Only the winner and lead-lap finishers get a time | **Left missing.** Not used in any test |
 | `fastest_lap_rank` | 33 | Retired before completing a timed lap | **Left missing.** Not used in any test |
-| `mean_pit_s`, `pit_delta_s` | 349 → 460 | No stop, plus 111 driver-races whose only stops were removed as outliers (step 6) | **Left missing.** These rows are excluded from the pit tests (D, F) |
+| `mean_pit_s`, `pit_delta_s` | 349 → 460 | No stop, plus 111 driver-races whose only stops were removed as outliers (step 6) | **Left missing.** These rows are excluded from the pit test (D) |
 
 **Why no imputation:** none of these values are missing at random. They are missing *because of* what happened in the race: a driver who retired has no race time. Filling in a mean or median would create race results that never happened and pull the groups toward each other. The variables the tests depend on (grid, position, points, status, constructor, circuit) have **no missing values**.
 
@@ -57,14 +57,14 @@ All steps are in `src/prepare.py`, which reads the table from Section 1 and writ
 **Pit-stop durations** need cleaning. The recorded time is from pit-lane entry to exit, and in a normal stop that is 16–37 s depending on the track. The raw data, though, run up to **3,069 s**:
 
 1. **Ceiling of 60 s (578 stops removed).** When a race is red-flagged, all cars park in the pit lane for 15–50 minutes, and the data log this as a "stop". No normal stop takes 60 s at any track: that is twice the slowest pit lane. These logged stops dominate red-flag races. At Monaco 2024 the *median* stop was 2,369 s, so a rule based only on the median would remove nothing there.
-2. **Race median + 10 s (293 more stops removed).** Each remaining stop is compared with the median stop of its race, which accounts for the pit lane's length. A stop more than 10 s slower than that is a repair (a new front wing), a stop-and-go penalty or a botched wheel change. These are real events, but they measure crashes and penalties, not how fast a crew services the car, which is what Tests D and F ask about.
+2. **Race median + 10 s (293 more stops removed).** Each remaining stop is compared with the median stop of its race, which accounts for the pit lane's length. A stop more than 10 s slower than that is a repair (a new front wing), a stop-and-go penalty or a botched wheel change. These are real events, but they measure crashes and penalties, not how fast a crew services the car, which is what Test D asks about.
 
 | | Stops | Mean | Median | Max | SD |
 |---|---:|---:|---:|---:|---:|
 | Before | 9,759 | 105.5 s | 23.9 s | 3,069.0 s | 357.7 s |
 | After | 8,888 | 24.2 s | 23.6 s | 44.7 s | 3.8 s |
 
-The median hardly changes (23.9 → 23.6 s), which shows that only the abnormal tail was removed. Each stop is then converted to **delta = duration − race median**, and averaging over each driver's stops gives `pit_delta_s`, the variable used in Tests D and F.
+The median hardly changes (23.9 → 23.6 s), which shows that only the abnormal tail was removed. Each stop is then converted to **delta = duration − race median**, and averaging over each driver's stops gives `pit_delta_s`, the variable used in Test D.
 
 ## 7. Encoding
 
@@ -74,7 +74,7 @@ The median hardly changes (23.9 → 23.6 s), which shows that only the abnormal 
 | `grid`, `position` | Kept as integers | Ordinal: 1st is better than 2nd, and the correlation tests need that order |
 | `is_classified` | `t`/`f` → boolean | Two-valued |
 | `date` | Text → date type | Allows sorting and era splits |
-| `top_team` | Boolean: Mercedes, Red Bull, Ferrari, McLaren | The 4 constructors with the most points 2014+. Groups for Tests C and F |
+| `top_team` | Boolean: Mercedes, Red Bull, Ferrari, McLaren | The 4 constructors with the most points 2014+. Groups for Test C |
 | `street` | Boolean: Monaco, Singapore, Baku, Jeddah, Las Vegas, Miami | Groups for Test E (45 street races, 222 permanent) |
 | `finish_cat` | podium (P1–3) / points (P4–10) / no points / retired (not classified, which includes all 17 disqualifications; the source wrongly flags 3 of them as classified, which we corrected) | The 4 outcome categories for Test C |
 | `winner` | Boolean: classified in P1 | Groups for Tests B and D |
