@@ -54,6 +54,5 @@ Run the scripts from the project root, in this order. Figures are written to `re
 | C | Do the top teams finish differently? | Chi-square test of independence | V = 0.218: matters |
 | D | Do winners have faster pit stops? | Welch t-test | −0.56 s [−0.68, −0.45]: matters |
 | E | Does track type change how well the grid predicts the finish? | Welch t-test on Fisher z | p = 0.18: inconclusive |
-| F | Are top teams' pit stops more consistent? | F-test (+ Levene / Brown-Forsythe) | SD −0.17 s: significant, possibly small |
 
 The full write-up is in `report/section5_tests.md`.
