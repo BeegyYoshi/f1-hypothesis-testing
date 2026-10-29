@@ -1,0 +1,50 @@
+\section{Dataset}
+
+\paragraph{Source.} The data come from the Jolpica F1 database (\url{https://api.jolpi.ca}), the
+community successor to the Ergast Developer API, which was retired after the 2024 season and and whose API
+format Jolpica keeps. We downloaded its public CSV dump (snapshot dated 9 October 2026), which covers every World
+Championship race from the 1950 British Grand Prix to round 16 of 2026, held on 4 October 2026. The dump is a relational database of 18 tables. We use
+seven of them: \texttt{session} (races, qualifying, practice), \texttt{sessionentry} (one driver's result in one
+session), \texttt{round} (a Grand Prix weekend), \texttt{circuit}, \texttt{driver}, \texttt{team} and
+\texttt{pitstop}. The tables \texttt{season}, \texttt{roundentry} and \texttt{teamdriver} serve only as keys
+for the joins.
+
+\paragraph{Analysis table.} We keep only race sessions (type \texttt{R}) and join the other tables to them, so that
+\textbf{one row is one driver's result in one Grand Prix}. Each driver's pit stops are aggregated into a stop
+count and a mean stop duration. The result has \textbf{26{,}225 rows $\times$ 26 columns} (1{,}165 races).
+
+\paragraph{Size after encoding.} Of the 26 columns, 18 are numeric, boolean or a date (stored as an ordinal day
+number), so each one stays a single column. The other 8 are nominal text columns, and one-hot encoding turns each
+into one indicator column per distinct value:
+\[
+\underbrace{818}_{\text{driver}}+\underbrace{205}_{\text{constructor}}+\underbrace{136}_{\text{finish status}}
++\underbrace{78}_{\text{circuit}}+\underbrace{56}_{\text{race name}}+\underbrace{40}_{\text{driver nat.}}
++\underbrace{34}_{\text{circuit country}}+\underbrace{23}_{\text{constructor nat.}} = 1{,}390
+\]
+\[
+\#\text{attributes} = 18 + 1{,}390 = 1{,}408,\qquad
+\#\text{instances}\times\#\text{attributes} = 26{,}225 \times 1{,}408 = 36{,}924{,}800 \;\geq\; 3{,}000{,}000.
+\]
+The table is about 12 times the required size. Before encoding it has
+$26{,}225 \times 26 = 681{,}850$ cells. The hypothesis tests use the hybrid era (2014--2026), a subset of 5{,}457 rows.
+
+\paragraph{Selected features and their real-world meaning.}
+\begin{itemize}
+  \item \texttt{grid}: the starting slot, set mainly by qualifying (1 = pole position). A value of 0 means
+        the car started from the pit lane.
+  \item \texttt{position}: the finishing order, and \texttt{is\_classified}: whether the driver covered enough
+        of the race distance (90\%) to be classified.
+  \item \texttt{points}: championship points scored in the race (25 for a win under the current system).
+  \item \texttt{detail}: the finish status, such as \emph{Finished}, \emph{+1 Lap}, \emph{Accident},
+        \emph{Engine} or \emph{Gearbox}. It separates mechanical failures from driver errors.
+  \item \texttt{laps\_completed} versus \texttt{scheduled\_laps}: how far the car got. The gap shows how early a retirement came.
+  \item \texttt{constructor}: the team that built and runs the car, for example Mercedes, Red Bull or Ferrari.
+        It stands in for car performance.
+  \item \texttt{circuit}, with \texttt{latitude}, \texttt{longitude} and \texttt{altitude}: the track. Altitude
+        matters for engine power and cooling, as at Mexico City, 2{,}227\,m above sea level.
+  \item \texttt{pit\_stops} and \texttt{mean\_pit\_s}: the number of stops and the mean time from pit-lane entry to exit
+        (around 22--24\,s), which includes the stationary tyre change. These data exist only from 2011 onward.
+  \item \texttt{driver\_age}: the driver's age on race day, computed from the date of birth.
+  \item \texttt{fastest\_lap\_rank} and \texttt{race\_time\_s}: the driver's pace. The race time exists only for
+        the winner and for drivers on the lead lap.
+\end{itemize}

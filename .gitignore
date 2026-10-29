@@ -1,0 +1,4 @@
+.DS_Store
+data/raw/
+data/jolpica-f1-csv.zip
+__pycache__/
